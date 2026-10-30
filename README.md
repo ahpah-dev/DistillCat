@@ -59,6 +59,15 @@ python -m distillcat --attach run --custom my_prompts.txt --no-thinking
  "source":"chat.deepseek.com","deepthink":true,"timestamp":"2026-10-30T16:00:00+00:00"}
 ```
 
+## If you hit a rate limit
+DistillCat detects DeepSeek's "too frequent / server busy / usage limit" messages, waits
+(`--limit-wait`, default 5 min, doubling each time, `--limit-retries` default 3), retries the same prompt,
+and if it's still limited it **stops and keeps everything saved**. Just re-run the same command later
+(e.g. a few hours, or the next day) and it resumes where it stopped.
+To avoid limits: use a bigger `--delay` (e.g. `--delay 30`), smaller batches (`--limit 10`), and
+`--no-thinking` (shorter answers). Don't use extra accounts or proxies to get around a limit.
+For high volume, use the official API (paid, with proper rate limits) instead.
+
 ## If extraction breaks
 DeepSeek's web UI changes. CSS selectors live in `distillcat/selectors.json`
 (`input`, `think_container`, `response`, ...). Update them using the browser's DevTools.

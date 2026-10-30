@@ -75,6 +75,13 @@ EXTRACT_JS = r"""
 """
 
 CHALLENGE_HINTS = re.compile(r"verify you are human|captcha|just a moment|unusual activity", re.I)
+LIMIT_HINTS = re.compile(
+    r"too frequent|too many requests|server is busy|try again later|usage limit|"
+    r"exceeded.{0,30}limit|reached.{0,30}limit|rate.?limited", re.I)
+
+
+class RateLimited(Exception):
+    """DeepSeek told us to slow down; the caller should wait and retry later."""
 
 
 def load_selectors():
@@ -170,6 +177,14 @@ class DeepSeekSession:
         self._wait_for_human_if_needed()
         self.log("Logged in. Session saved in the browser profile.")
 
+    def _rate_limited(self, prompt):
+        """True if the page shows a limit/busy message (ignoring our own prompt text)."""
+        try:
+            body = self.page.inner_text("body", timeout=3000).replace(prompt, "")
+        except Exception:
+            return False
+        return LIMIT_HINTS.search(body) is not None
+
     # ---- main operation --------------------------------------------------
     def ask(self, prompt):
         """Send one prompt in a fresh chat; return dict(thinking, output)."""
@@ -186,6 +201,8 @@ class DeepSeekSession:
             self.page.wait_for_selector(
                 f'{self.sel["response"]}, {self.sel["think_container"]}', timeout=60000)
         except PWTimeout:
+            if self._rate_limited(prompt):
+                raise RateLimited("DeepSeek reported a rate/usage limit")
             raise RuntimeError("No response started within 60s (rate limit, challenge or selector changed?)")
 
         # Wait until the content stops changing for `settle` seconds.
@@ -200,6 +217,8 @@ class DeepSeekSession:
             idle = time.time() - last_change
             if cur["output"] and idle >= self.settle:
                 return cur
+            if not cur["output"] and not cur["thinking"] and idle >= 15 and self._rate_limited(prompt):
+                raise RateLimited("DeepSeek reported a rate/usage limit")
             if time.time() - start > self.max_wait:
                 self.log("  [warn] hit max wait; saving what we have")
                 return cur

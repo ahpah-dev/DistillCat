@@ -146,8 +146,7 @@ def cmd_login(args):
 
 
 def cmd_run(args):
-    from .scraper import DeepSeekSession
-
+    from .scraper import DeepSeekSession, RateLimited
     if args.custom_only:
         items = _load_custom(args.custom or DEFAULT_CUSTOM)   # only your prompts
     else:
@@ -169,19 +168,39 @@ def cmd_run(args):
         return
 
     ok = fail = 0
+    stopped_by_limit = False
     with DeepSeekSession(args.profile, thinking=not args.no_thinking, search=False,
                          headless=False, settle_seconds=args.settle,
                          max_wait_seconds=args.max_wait, **_session_kwargs(args)) as s:
         for n, (pid, cat, prompt) in enumerate(todo, 1):
             print(f"[{n}/{len(todo)}] {pid}: {prompt[:70].replace(chr(10), ' ')}...")
-            try:
-                res = s.ask(prompt)
-            except KeyboardInterrupt:
-                print("Interrupted. Progress is saved; re-run to resume.")
+            res = None
+            wait = args.limit_wait
+            for attempt in range(args.limit_retries + 1):
+                try:
+                    res = s.ask(prompt)
+                    break
+                except RateLimited:
+                    if attempt == args.limit_retries:
+                        stopped_by_limit = True
+                        break
+                    print(f"  rate limit hit. Waiting {wait / 60:.0f} min, then retrying "
+                          f"({attempt + 1}/{args.limit_retries}). Ctrl+C to stop.")
+                    time.sleep(wait)
+                    wait *= 2
+                except KeyboardInterrupt:
+                    print("Interrupted. Progress is saved; re-run to resume.")
+                    stopped_by_limit = True
+                    break
+                except Exception as e:
+                    fail += 1
+                    print(f"  failed: {e}")
+                    break
+            if stopped_by_limit:
+                print("Stopping: still rate limited. Progress is saved; re-run the same command "
+                      "later (e.g. in a few hours) and it will resume where it left off.")
                 break
-            except Exception as e:
-                fail += 1
-                print(f"  failed: {e}")
+            if res is None:
                 continue
             if not res["output"]:
                 fail += 1
@@ -237,6 +256,10 @@ def main(argv=None):
     r.add_argument("--delay", type=float, default=8.0, help="seconds between prompts (+ jitter)")
     r.add_argument("--settle", type=float, default=8.0, help="idle seconds that mean 'finished'")
     r.add_argument("--max-wait", type=float, default=600.0, help="per-prompt timeout seconds")
+    r.add_argument("--limit-wait", type=float, default=300.0,
+                   help="seconds to wait after a rate limit (doubles each retry)")
+    r.add_argument("--limit-retries", type=int, default=3,
+                   help="retries after a rate limit before stopping the run")
     r.set_defaults(fn=cmd_run)
 
     args = ap.parse_args(argv)

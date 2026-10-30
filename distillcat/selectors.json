@@ -1,0 +1,10 @@
+{
+  "url": "https://chat.deepseek.com/",
+  "input": "textarea#chat-input, textarea",
+  "think_container": ".ds-think-content",
+  "response": ".ds-markdown",
+  "code_block": ".md-code-block",
+  "deepthink_button_text": "DeepThink",
+  "search_button_text": "Search",
+  "selected_class_regex": "selected|active|checked"
+}

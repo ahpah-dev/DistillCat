@@ -1,0 +1,11 @@
+# Browser profiles contain login cookies/sessions - never commit
+browser_profile/
+diagnose/
+
+# Collected datasets
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+.venv/

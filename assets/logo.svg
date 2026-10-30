@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6d5dfc"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <!-- ears -->
+  <path d="M60 110 L66 52 L112 84 Z" fill="#1e1b3a"/>
+  <path d="M196 110 L190 52 L144 84 Z" fill="#1e1b3a"/>
+  <path d="M71 90 L73 68 L93 82 Z" fill="#ff9ec4"/>
+  <path d="M185 90 L183 68 L163 82 Z" fill="#ff9ec4"/>
+  <!-- head -->
+  <ellipse cx="128" cy="140" rx="72" ry="62" fill="#1e1b3a"/>
+  <!-- eyes -->
+  <ellipse cx="102" cy="132" rx="12" ry="15" fill="#fde047"/>
+  <ellipse cx="154" cy="132" rx="12" ry="15" fill="#fde047"/>
+  <ellipse cx="102" cy="132" rx="4" ry="11" fill="#1e1b3a"/>
+  <ellipse cx="154" cy="132" rx="4" ry="11" fill="#1e1b3a"/>
+  <!-- nose + mouth -->
+  <path d="M120 154 L136 154 L128 164 Z" fill="#ff9ec4"/>
+  <path d="M128 164 Q128 176 116 176 M128 164 Q128 176 140 176" stroke="#e5e7eb" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- whiskers -->
+  <g stroke="#e5e7eb" stroke-width="3" stroke-linecap="round">
+    <path d="M80 156 L40 148"/><path d="M80 164 L40 168"/>
+    <path d="M176 156 L216 148"/><path d="M176 164 L216 168"/>
+  </g>
+  <!-- distillation drop on forehead -->
+  <path d="M128 92 C118 106 116 112 128 114 C140 112 138 106 128 92 Z" fill="#2dd4bf"/>
+</svg>

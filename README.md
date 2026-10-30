@@ -26,18 +26,32 @@ python -m distillcat launch                # log in to DeepSeek in the window th
 python -m distillcat --attach diagnose
 python -m distillcat --attach run --limit 3
 ```
-## Custom mode (your own prompts)
+## Custom mode (only your own prompts)
 ```powershell
-python -m distillcat add                                  # opens my_prompts.txt in Notepad: one prompt per line, save, close
-python -m distillcat add "Write a Rust hello world"       # or add a single prompt straight from the command line
-python -m distillcat --browser chrome run --custom-only   # run ONLY your prompts
-python -m distillcat --browser chrome run --custom my_prompts.txt     # built-ins + yours
+python -m distillcat add                    # opens my_prompts.txt in Notepad -> add prompts, save, close
+python -m distillcat custom --dry-run       # check what will run (sends nothing)
+python -m distillcat custom                 # run ONLY your prompts -> distillcat_dataset.jsonl
 ```
-`my_prompts.txt`: one prompt per line, lines starting with `#` are ignored, write `\n` for a line
-break inside a prompt. `.jsonl` files (`{"category": "...", "prompt": "..."}` per line) also work
-with `--custom`. Ids are derived from the prompt text, so
-resuming works even if you edit or reorder the file.
+Everything else works the same, e.g. `custom --attach --limit 5 --delay 20 --no-thinking --out mine.jsonl`.
+If `my_prompts.txt` has no prompts yet, `custom` opens it for you instead of failing.
 
+**Prompt file formats** (auto-detected, any editor/encoding):
+- **One prompt per line** (write `\n` for a line break). Lines starting with `#` are ignored.
+- **Multi-line prompts**: separate them with a line containing only `---`.
+  ```
+  Fix this code:
+  def f(x): return x+
+  ---
+  Write a poem about cats.
+  ```
+- `.jsonl` with `{"category": "...", "prompt": "..."}` per line (use `--file prompts.jsonl`).
+
+**Several samples of the same prompt:** list it multiple times, or use `--repeat 3` (each sample is saved
+separately). Runs are resumable: finished prompts are skipped.
+
+Add one prompt from the command line: `python -m distillcat add "Write a Rust hello world"`.
+Built-ins + yours together: `python -m distillcat run --custom my_prompts.txt`.
+Browser flags (`--attach`, `--browser`, `--port`) work before or after the command.
 Other options:
 ```powershell
 python -m distillcat list                  # show categories

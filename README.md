@@ -25,6 +25,17 @@ the debug port with 404 and refuse to be attached, in which case use the mode ab
 python -m distillcat launch
 python -m distillcat --attach run --limit 3
 ```
+## Custom mode (your own prompts)
+```powershell
+python -m distillcat add                                  # type prompts interactively -> my_prompts.jsonl
+python -m distillcat --browser chrome run --custom-only   # run ONLY your prompts
+python -m distillcat --browser chrome run --custom my_prompts.jsonl   # built-ins + yours
+python -m distillcat --browser chrome run --custom-only --custom other.txt --categories mycat
+```
+Prompt files can be `.jsonl` (`{"category": "...", "prompt": "..."}` per line) or `.txt`
+(one prompt per line; write `\n` for line breaks). Ids are derived from the prompt text, so
+resuming works even if you edit or reorder the file.
+
 Other options:
 ```powershell
 python -m distillcat list                  # show categories

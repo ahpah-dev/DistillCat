@@ -80,7 +80,7 @@ def cmd_list(args):
 
 def _session_kwargs(args):
     return {
-        "cdp_url": f"http://127.0.0.1:{args.port}" if args.attach else None,
+        "cdp_url": f"http://localhost:{args.port}" if args.attach else None,
         "channel": {"chromium": None}.get(args.browser, args.browser),
     }
 
@@ -209,7 +209,7 @@ def main(argv=None):
     ap.add_argument("--profile", default="browser_profile", help="browser profile dir")
     ap.add_argument("--attach", action="store_true",
                     help="attach to your already-running Chrome/Edge (start it with 'launch')")
-    ap.add_argument("--port", type=int, default=9222, help="remote debugging port")
+    ap.add_argument("--port", type=int, default=9333, help="remote debugging port")
     ap.add_argument("--browser", default="chrome", choices=["chrome", "msedge", "chromium"],
                     help="installed browser to use (default: chrome)")
     sub = ap.add_subparsers(dest="cmd", required=True)

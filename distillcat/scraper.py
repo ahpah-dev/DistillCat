@@ -108,10 +108,9 @@ class DeepSeekSession:
             except Exception as e:
                 self._pw.stop()
                 raise RuntimeError(
-                    f"Could not attach to a browser at {self.cdp_url}. Newer Chrome versions may refuse "
-                    f"remote-debugging connections. Close that window and run without --attach "
-                    f"(e.g. 'python -m distillcat --browser chrome diagnose'), which lets "
-                    f"DistillCat open your installed Chrome itself. ({e})")
+                    f"Could not attach to a browser at {self.cdp_url}. Is it running? Start it with "
+                    f"'python -m distillcat launch' (same --port), or check another program isn't "
+                    f"using that port. Or run without --attach. ({e})")
             self.ctx = self.browser.contexts[0] if self.browser.contexts else self.browser.new_context()
             self.page = self.ctx.new_page()  # own tab; your other tabs are untouched
         else:

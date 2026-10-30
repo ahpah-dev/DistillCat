@@ -19,10 +19,11 @@ python -m distillcat --browser chrome run --limit 3
 ```
 Use the same `--browser` value every time: Chrome, Edge and bundled Chromium each keep their own login.
 
-Experimental: attach to a browser you started with `launch` (some Chrome versions, e.g. 156, answer
-the debug port with 404 and refuse to be attached, in which case use the mode above):
+Attach to a browser you started with `launch` (uses debug port 9333; change with `--port`, use the same
+value for `launch` and `--attach`):
 ```powershell
-python -m distillcat launch
+python -m distillcat launch                # log in to DeepSeek in the window that opens, leave it open
+python -m distillcat --attach diagnose
 python -m distillcat --attach run --limit 3
 ```
 ## Custom mode (your own prompts)

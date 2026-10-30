@@ -9,3 +9,6 @@ diagnose/
 __pycache__/
 *.pyc
 .venv/
+
+# Your private prompts
+my_prompts.txt

@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import os
 import random
 import sys
 import time
@@ -18,7 +19,7 @@ BANNER = r"""
 """
 
 
-DEFAULT_CUSTOM = "my_prompts.jsonl"
+DEFAULT_CUSTOM = "my_prompts.txt"
 
 
 def _custom_id(prompt):
@@ -35,7 +36,7 @@ def _load_custom(path):
     out = []
     for line in p.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if not line:
+        if not line or (p.suffix != '.jsonl' and line.startswith('#')):
             continue
         if p.suffix == ".jsonl":
             d = json.loads(line)
@@ -46,34 +47,30 @@ def _load_custom(path):
     return out
 
 
-def cmd_add(args):
-    """Interactively add prompts to your custom prompt file."""
-    path = Path(args.file)
-    print(f"Adding prompts to {path}. Finish a prompt with a line containing only END.")
-    print("Leave the prompt empty (just type END) to quit.\n")
-    n = 0
-    while True:
-        cat = input(f"Category [{args.category}]: ").strip() or args.category
-        print("Prompt (multi-line OK, end with END):")
-        lines = []
-        while True:
-            try:
-                line = input()
-            except EOFError:
-                line = "END"
-            if line.strip() == "END":
-                break
-            lines.append(line)
-        prompt = "\n".join(lines).strip()
-        if not prompt:
-            break
-        with path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps({"category": cat, "prompt": prompt}, ensure_ascii=False) + "\n")
-        n += 1
-        args.category = cat
-        print(f"  saved ({n} added)\n")
-    print(f"Done. Run them with: python -m distillcat --browser chrome run --custom-only")
+TEMPLATE = """# DistillCat - your own prompts. ONE PROMPT PER LINE. Lines starting with # are ignored.
+# For a line break inside a prompt, write \\n
+# Example:
+# Write a Python function that checks if a number is prime, with tests.
+"""
 
+
+def cmd_add(args):
+    """Add your own prompts. With text: append it. Without text: open the file in Notepad."""
+    path = Path(args.file)
+    if not path.exists():
+        path.write_text(TEMPLATE, encoding="utf-8")
+    if args.text:
+        prompt = " ".join(args.text).strip().replace("\r", "").replace("\n", "\\n")
+        with path.open("a", encoding="utf-8") as f:
+            f.write(prompt + "\n")
+        print(f"Added to {path}.")
+    else:
+        print(f"Opening {path} - type one prompt per line, save the file, close it.")
+        try:
+            os.startfile(path.resolve())
+        except AttributeError:  # not Windows
+            print(f"Edit this file in any editor: {path.resolve()}")
+    print("Run your prompts with:  python -m distillcat --browser chrome run --custom-only")
 
 def cmd_list(args):
     for cat, items in PROMPTS.items():
@@ -223,9 +220,9 @@ def main(argv=None):
                    ).set_defaults(fn=cmd_launch)
     sub.add_parser("list", help="show built-in prompt categories").set_defaults(fn=cmd_list)
     sub.add_parser("login", help="open browser to log in once").set_defaults(fn=cmd_login)
-    a = sub.add_parser("add", help="interactively add your own prompts")
+    a = sub.add_parser("add", help="add your own prompts (no text = open my_prompts.txt in Notepad)")
     a.add_argument("--file", default=DEFAULT_CUSTOM, help=f"default: {DEFAULT_CUSTOM}")
-    a.add_argument("--category", default="custom", help="default category label")
+    a.add_argument("text", nargs="*", help="prompt text to append (optional)")
     a.set_defaults(fn=cmd_add)
 
     r = sub.add_parser("run", help="send prompts and collect the dataset")

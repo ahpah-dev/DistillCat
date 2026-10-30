@@ -27,13 +27,14 @@ python -m distillcat --attach run --limit 3
 ```
 ## Custom mode (your own prompts)
 ```powershell
-python -m distillcat add                                  # type prompts interactively -> my_prompts.jsonl
+python -m distillcat add                                  # opens my_prompts.txt in Notepad: one prompt per line, save, close
+python -m distillcat add "Write a Rust hello world"       # or add a single prompt straight from the command line
 python -m distillcat --browser chrome run --custom-only   # run ONLY your prompts
-python -m distillcat --browser chrome run --custom my_prompts.jsonl   # built-ins + yours
-python -m distillcat --browser chrome run --custom-only --custom other.txt --categories mycat
+python -m distillcat --browser chrome run --custom my_prompts.txt     # built-ins + yours
 ```
-Prompt files can be `.jsonl` (`{"category": "...", "prompt": "..."}` per line) or `.txt`
-(one prompt per line; write `\n` for line breaks). Ids are derived from the prompt text, so
+`my_prompts.txt`: one prompt per line, lines starting with `#` are ignored, write `\n` for a line
+break inside a prompt. `.jsonl` files (`{"category": "...", "prompt": "..."}` per line) also work
+with `--custom`. Ids are derived from the prompt text, so
 resuming works even if you edit or reorder the file.
 
 Other options:
